@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trello Clone</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f5f7;
+    }
+
+    .board {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      overflow-x: auto;
+      flex-wrap: wrap;
+    }
+
+    .column {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+
+    .column-header {
+      background: #0079bf;
+      color: #ffffff;
+      padding: 10px;
+      font-weight: bold;
+      border-radius: 8px 8px 0 0;
+      text-align: center;
+    }
+
+    .card {
+      background: #f4f5f7;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: grab;
+    }
+
+    .card:active {
+      cursor: grabbing;
+    }
+
+    .card-text {
+      margin-bottom: 10px;
+    }
+
+    .card-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .card-button {
+      background: #0079bf;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .card-button:hover {
+      background: #005a8c;
+    }
+
+    .delete-card {
+      background: #ff5c5c;
+    }
+
+    .delete-card:hover {
+      background: #ff0000;
+    }
+
+    .add-card {
+      background: #0079bf;
+      color: #ffffff;
+      text-align: center;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .add-card:hover {
+      background: #005a8c;
+    }
+
+    .dropzone {
+      flex-grow: 1;
+      padding: 10px;
+      min-height: 50px;
+    }
+
+    .dropzone.drag-over {
+      background-color: #e0f7fa;
+      border: 2px dashed #0079bf;
+    }
+
+    @media (max-width: 768px) {
+      .board {
+        flex-direction: column;
+      }
+
+      .column {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="board">
+    <div class="column" data-column="upcoming">
+      <div class="column-header">Upcoming</div>
+      <div class="dropzone" data-dropzone="upcoming">
+        <div class="card" draggable="true">
+          <span class="card-text">Plan marketing campaign</span>
+          <div class="card-buttons">
+            <button class="card-button edit-card">Edit</button>
+            <button class="card-button delete-card">&times;</button>
+          </div>
+        </div>
+        <div class="card" draggable="true">
+          <span class="card-text">Approve legal agreement</span>
+          <div class="card-buttons">
+            <button class="card-button edit-card">Edit</button>
+            <button class="card-button delete-card">&times;</button>
+          </div>
+        </div>
+      </div>
+      <div class="add-card">+ Add another card</div>
+    </div>
+    <div class="column" data-column="in-progress">
+      <div class="column-header">In Progress</div>
+      <div class="dropzone" data-dropzone="in-progress">
+        <div class="card" draggable="true">
+          <span class="card-text">Collect design assets</span>
+          <div class="card-buttons">
+            <button class="card-button edit-card">Edit</button>
+            <button class="card-button delete-card">&times;</button>
+          </div>
+        </div>
+      </div>
+      <div class="add-card">+ Add another card</div>
+    </div>
+    <div class="column" data-column="done">
+      <div class="column-header">Done</div>
+      <div class="dropzone" data-dropzone="done">
+        <div class="card" draggable="true">
+          <span class="card-text">Review legal agreement</span>
+          <div class="card-buttons">
+            <button class="card-button edit-card">Edit</button>
+            <button class="card-button delete-card">&times;</button>
+          </div>
+        </div>
+      </div>
+      <div class="add-card">+ Add another card</div>
+    </div>
+  </div>
+  <script>
+    const cards = document.querySelectorAll('.card');
+    const dropzones = document.querySelectorAll('.dropzone');
+
+    // Enable dragging for cards
+    cards.forEach(card => {
+      card.addEventListener('dragstart', () => {
+        card.classList.add('dragging');
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+      });
+    });
+
+    // Handle dropzones
+    dropzones.forEach(zone => {
+      zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('drag-over');
+        const draggingCard = document.querySelector('.dragging');
+        zone.appendChild(draggingCard);
+      });
+
+      zone.addEventListener('dragleave', () => {
+        zone.classList.remove('drag-over');
+      });
+
+      zone.addEventListener('drop', () => {
+        zone.classList.remove('drag-over');
+      });
+    });
+
+    // Add event listener to delete and edit buttons
+    function attachCardEvents(card) {
+      const deleteButton = card.querySelector('.delete-card');
+      const editButton = card.querySelector('.edit-card');
+      const cardText = card.querySelector('.card-text');
+
+      // Delete card
+      deleteButton.addEventListener('click', () => {
+        card.remove();
+      });
+
+      // Edit card text
+      editButton.addEventListener('click', () => {
+        const newText = prompt('Edit card text:', cardText.textContent);
+        if (newText) {
+          cardText.textContent = newText;
+        }
+      });
+    }
+
+    document.querySelectorAll('.card').forEach(card => {
+      attachCardEvents(card);
+    });
+
+    // Add new cards
+    document.querySelectorAll('.add-card').forEach(button => {
+      button.addEventListener('click', () => {
+        const text = prompt('Enter card text:');
+        if (text) {
+          const newCard = document.createElement('div');
+          newCard.className = 'card';
+          newCard.draggable = true;
+          newCard.innerHTML = `
+            <span class="card-text">${text}</span>
+            <div class="card-buttons">
+              <button class="card-button edit-card">Edit</button>
+              <button class="card-button delete-card">&times;</button>
+            </div>
+          `;
+
+          const dropzone = button.previousElementSibling;
+          dropzone.appendChild(newCard);
+
+          // Enable dragging for new cards
+          newCard.addEventListener('dragstart', () => {
+            newCard.classList.add('dragging');
+          });
+
+          newCard.addEventListener('dragend', () => {
+            newCard.classList.remove('dragging');
+          });
+
+          // Attach delete and edit functionality to new card
+          attachCardEvents(newCard);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
